@@ -1,0 +1,55 @@
+name: Pipeline examen diebaqsan
+on:
+  push:
+    branches: [ main ]
+jobs:
+  Test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clonando el repositorio y estableciendo el espacio de trabajo
+        uses: actions/checkout@v3
+      - name: Configurando java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '16'
+      - name: Ejecutando los test
+        run: |
+          chmod +x gradlew        
+          ./gradlew test
+  Publish:
+    runs-on: ubuntu-latest
+    needs: Test              # Esta tarea solo se ejecutará si se pasan los tests
+    env:
+      GITHUB_LOGIN: ${{ github.actor }}
+      GITHUB_PACKAGES: ${{ secrets.GITHUB_TOKEN }}   # GITHUB_TOKEN no puede añadirse como secreto porque ya se añade de forma predeterminada
+      GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - run: echo "El desarrollador ${{ github.actor }} está añadiendo una nueva versión"
+      - name: Clonando el repositorio y estableciendo el espacio de trabajo
+        uses: actions/checkout@v3
+      - name: Configurando java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '16'
+      - name: Publicando el artefacto
+        run: |
+          chmod +x gradlew        
+          ./gradlew publish
+      - run: echo "El desarrollador diebaqsan ha añadido una nueva versión"
+  Mail:
+    runs-on: ubuntu-latest
+    needs: Publish                 # Como tarea hacemos que dependa de "Publish", porque si no no queremos que se envie ningún correo
+    steps:
+      - name: Enviar correo
+        uses: dawidd6/action-send-mail@v3.12.0
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.EMAIL }}      # No poner los usuarios como hard-code
+          password: ${{ secrets.PASSWORD }}
+          subject: "Artefacto de diebaqsan publicado"
+          body: "El artefacto generado por diebaqsan se ha publicado correctamente."
+          to: ${{secrets.DESTINATARIO}}
+          from: diebaqsan
