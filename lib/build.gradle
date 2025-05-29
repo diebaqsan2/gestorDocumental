@@ -10,6 +10,7 @@ plugins {
     // Apply the java-library plugin for API and implementation separation.
     id 'java-library'
     id 'eclipse'
+    id 'maven-publish'
 }
 
 repositories {
@@ -24,7 +25,9 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.9.1'
     testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.2'   
-    implementation 'org.apache.logging.log4j:log4j-core:2.23.1'      
+    implementation 'org.apache.logging.log4j:log4j-core:2.23.1'
+    implementation("org.apache.poi:poi-ooxml:5.2.5")
+
  }
 
 // Apply a specific Java toolchain to ease working on different environments.
@@ -37,4 +40,31 @@ java {
 tasks.named('test') {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/diebaqsan2/gestorDocumental")
+            credentials {
+                //las propiedades gpr.user y gpr.key están configuradas en gradle.properties en el raiz del proyecto, y se añade a .gitignore para que no se suban
+                //O bien configuro las variables de entorno GITHUB_LOGIN y GITHUB_PACKAGES
+                username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_LOGIN")
+                password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_PACKAGES")
+            }
+        }
+    }
+    publications {
+        gpr(MavenPublication) {
+            //Del tutorial https://docs.gradle.org/current/userguide/publishing_maven.html#publishing_maven
+
+            groupId = 'us.dit.fs.diebaqsan'
+            artifactId = 'gestor-documental'
+            version = '1.0-SNAPSHOT'
+
+            from components.java
+        }
+
+    }
 }
