@@ -9,4 +9,4 @@ https://github.com/eugenp/tutorials/tree/master/apache-poi-2
 
 El detalle de la tarea a realizar por el alumno se entrega en el aula del examen
 
-Ejercicio realizado por Andrés Guijarro Camino
+Ejercicio realizado por Diego Baquero Sanz
